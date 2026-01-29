@@ -1,178 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desk Collection</title>
-    
+    <title>Debt Collection Management</title>
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans text-slate-800">
 
-    <div x-data="deskApp()" class="container mx-auto px-4 py-8">
-        
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+
+    <div x-data="collectionApp()" class="container mx-auto px-4 py-8">
+
         <!-- Header -->
-        <header class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Desk Collection</h1>
-                <p class="text-slate-500 mt-2">Curate your perfect workspace</p>
+                <h1 class="text-3xl font-bold text-gray-900">Desk Collection System</h1>
+                <p class="text-gray-500">Manage debtors, loans, and interactions</p>
             </div>
-            <button 
-                @click="openModal('create')"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-                Add Desk
+            <button @click="openDebtorModal()"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow transition">
+                + Add New Debtor
             </button>
-        </header>
-
-        <!-- Loading State -->
-        <div x-show="isLoading" class="flex justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
 
-        <!-- Desk Grid -->
-        <div x-show="!isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" x-transition.opacity>
-            <template x-for="desk in desks" :key="desk.id">
-                <div class="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full">
-                    
-                    <!-- Image Placeholder or Actual Image -->
-                    <div class="h-48 bg-slate-200 w-full object-cover flex items-center justify-center text-slate-400 overflow-hidden">
-                        <template x-if="desk.imageUrl">
-                            <img :src="desk.imageUrl" alt="Desk Image" class="w-full h-full object-cover">
-                        </template>
-                        <template x-if="!desk.imageUrl">
-                            <span class="text-4xl text-slate-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </span>
-                        </template>
-                    </div>
+        <!-- Controls (Search, Sort, Filter) -->
+        <div
+            class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
 
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="flex justify-between items-start mb-2">
-                            <h2 class="text-2xl font-bold text-slate-800 leading-tight" x-text="desk.name"></h2>
-                            <span class="bg-indigo-50 text-indigo-700 text-sm font-semibold px-2 py-1 rounded" x-text="'$' + (desk.price ? desk.price : '0.00')"></span>
-                        </div>
-                        
-                        <p class="text-slate-600 text-sm mb-4 line-clamp-3" x-text="desk.description"></p>
-                        
-                        <div class="mt-auto space-y-2 text-sm text-slate-500">
-                            <div class="flex items-center gap-2" x-show="desk.dimensions">
-                                <span class="font-medium text-slate-700">Dim:</span>
-                                <span x-text="desk.dimensions"></span>
-                            </div>
-                            <div class="flex items-center gap-2" x-show="desk.material">
-                                <span class="font-medium text-slate-700">Mat:</span>
-                                <span x-text="desk.material"></span>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Search -->
+            <div class="w-full md:w-1/3 relative">
+                <input type="text" x-model="searchQuery" placeholder="Search name or phone..."
+                    class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
 
-                    <!-- Actions -->
-                    <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-t border-slate-100">
-                        <button @click="openModal('edit', desk)" class="text-slate-500 hover:text-indigo-600 font-medium text-sm transition transition-colors">Edit</button>
-                        <button @click="deleteDesk(desk.id)" class="text-red-400 hover:text-red-600 font-medium text-sm transition transition-colors">Delete</button>
+            <!-- Filters & Sort -->
+            <div class="flex gap-4 items-center w-full md:w-auto">
+
+                <!-- Sort -->
+                <select x-model="sortBy"
+                    class="border rounded-lg text-sm px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="name_asc">Name (A-Z)</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="debt_desc">Highest Debt</option>
+                    <option value="debt_asc">Lowest Debt</option>
+                </select>
+
+                <!-- Filter Checkbox -->
+                <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer select-none">
+                    <input type="checkbox" x-model="filterHasDebt"
+                        class="rounded text-blue-600 focus:ring-blue-500 h-4 w-4">
+                    <span>Has Debt Only</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Debtor List -->
+        <!-- Debtor List Table -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name / Contact</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Address</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Total Debt</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="debtor in filteredDebtors" :key="debtor.id">
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900" x-text="debtor.name"></div>
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <span x-text="debtor.phoneNumber"></span>
+                                                <a :href="getWhatsappLink(debtor.phoneNumber)" target="_blank"
+                                                    class="ml-2 text-green-600 hover:text-green-800"
+                                                    title="Chat on WhatsApp">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.506-.669-.516-.173-.009-.371-.011-.57-.011-.198 0-.52.074-.792.372-.272.297-1.04 1.017-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900" x-text="debtor.address || '-'"></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
+                                        x-text="formatCurrency(calculateTotalDebt(debtor.loans))"></span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button @click="openManageModal(debtor)"
+                                        class="text-indigo-600 hover:text-indigo-900 mr-4">Manage</button>
+                                    <button @click="deleteDebtor(debtor.id)"
+                                        class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div x-show="debtors.length === 0"
+            class="text-center py-20 bg-white rounded-lg shadow-sm border border-dashed border-gray-300 mt-6" x-cloak>
+            <h3 class="text-xl font-medium text-gray-900">No Debtors Found</h3>
+            <p class="text-gray-500 mt-2">Get started by adding a new debtor to the system.</p>
+            <button @click="openDebtorModal()"
+                class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded shadow transition">
+                Add Debtor
+            </button>
+        </div>
+
+        <!-- Add Debtor Modal -->
+        <div x-show="isDebtorModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="fixed inset-0 bg-black opacity-30" @click="closeDebtorModal()"></div>
+                <div class="relative bg-white rounded-lg w-full max-w-md p-6 shadow-xl">
+                    <h2 class="text-2xl font-bold mb-4">Add New Debtor</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" x-model="debtorForm.name"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Phone Number (WhatsApp)</label>
+                            <input type="text" x-model="debtorForm.phoneNumber" placeholder="e.g. 628123456789"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Address</label>
+                            <textarea x-model="debtorForm.address" rows="3"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button @click="closeDebtorModal()"
+                                class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button @click="saveDebtor()"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+                        </div>
                     </div>
                 </div>
-            </template>
-            
-            <!-- Empty State -->
-            <div x-show="desks.length === 0" class="col-span-full py-12 text-center text-slate-500">
-                <p class="text-lg">No desks found via API.</p>
-                <p class="text-sm">Make sure the backend is running and connected to PostgreSQL.</p>
             </div>
         </div>
 
-        <!-- Modal -->
-        <div 
-            x-show="isModalOpen" 
-            style="display: none;"
-            class="fixed inset-0 z-50 overflow-y-auto" 
-            aria-labelledby="modal-title" 
-            role="dialog" 
-            aria-modal="true">
-            
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                
-                <!-- Backdrop -->
-                <div 
-                    x-show="isModalOpen"
-                    x-transition:enter="ease-out duration-300"
-                    x-transition:enter-start="opacity-0"
-                    x-transition:enter-end="opacity-100"
-                    x-transition:leave="ease-in duration-200"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
-                    @click="closeModal()"
-                    aria-hidden="true"></div>
+        <!-- Manage / Details Modal (Loans & Interactions) -->
+        <div x-show="isManageModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="fixed inset-0 bg-black opacity-30" @click="closeManageModal()"></div>
+                <div
+                    class="relative bg-white rounded-lg w-full max-w-4xl p-0 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
 
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <!-- Header -->
+                    <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800" x-text="selectedDebtor?.name"></h2>
+                            <p class="text-sm text-gray-500" x-text="selectedDebtor?.phoneNumber"></p>
+                        </div>
+                        <button @click="closeManageModal()" class="text-gray-400 hover:text-gray-500">
+                            <span class="text-2xl">&times;</span>
+                        </button>
+                    </div>
 
-                <!-- Modal Panel -->
-                <div 
-                    x-show="isModalOpen"
-                    x-transition:enter="ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave="ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-                    
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title" x-text="modalMode === 'create' ? 'Add New Desk' : 'Edit Desk'"></h3>
-                                <div class="mt-4 space-y-4">
-                                    <div>
-                                        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                                        <input type="text" x-model="formData.name" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Left: Loans -->
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">Loans</h3>
+                                    <button @click="showLoanForm = !showLoanForm"
+                                        class="text-sm text-blue-600 hover:underline">+ Add Loan</button>
+                                </div>
+
+                                <!-- Add Loan Form -->
+                                <div x-show="showLoanForm" class="bg-blue-50 p-4 rounded-lg mb-4 text-sm" x-transition>
+                                    <div class="space-y-3">
+                                        <input type="number" x-model="loanForm.amount" placeholder="Amount"
+                                            class="w-full border rounded p-2">
+                                        <input type="date" x-model="loanForm.dueDate" class="w-full border rounded p-2">
+                                        <button @click="saveLoan()"
+                                            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Add
+                                            Loan</button>
                                     </div>
-                                    <div>
-                                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                                        <textarea x-model="formData.description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"></textarea>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label for="dimensions" class="block text-sm font-medium text-gray-700">Dimensions</label>
-                                            <input type="text" x-model="formData.dimensions" id="dimensions" placeholder="e.g. 120x60x80" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
+                                </div>
+
+                                <!-- Loan List -->
+                                <div class="space-y-3">
+                                    <template x-for="loan in currentLoans" :key="loan.id">
+                                        <div
+                                            class="bg-white border rounded p-3 shadow-sm flex justify-between items-center">
+                                            <div>
+                                                <div class="font-bold text-gray-800"
+                                                    x-text="formatCurrency(loan.remainingAmount)"></div>
+                                                <div class="text-xs text-gray-500">Due: <span
+                                                        x-text="loan.dueDate"></span></div>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs rounded-full font-semibold" :class="{
+                                                    'bg-green-100 text-green-800': loan.status === 'CURRENT',
+                                                    'bg-red-100 text-red-800': loan.status === 'OVERDUE'
+                                                  }" x-text="loan.status || 'CURRENT'"></span>
                                         </div>
-                                        <div>
-                                            <label for="price" class="block text-sm font-medium text-gray-700">Price</label>
-                                            <input type="number" step="0.01" x-model="formData.price" id="price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
+                                    </template>
+                                    <div x-show="currentLoans.length === 0"
+                                        class="text-center text-gray-400 text-sm py-4">No loans record.</div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Interactions -->
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">Interactions / Reminders</h3>
+                                </div>
+
+                                <!-- Add Interaction -->
+                                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                    <textarea x-model="interactionForm.notes" rows="2"
+                                        placeholder="Enter interaction notes..."
+                                        class="w-full border rounded p-2 text-sm mb-2"></textarea>
+                                    <div class="flex space-x-2">
+                                        <select x-model="interactionForm.type"
+                                            class="border rounded p-2 text-sm flex-1">
+                                            <option value="CALL">Call</option>
+                                            <option value="WHATSAPP">WhatsApp</option>
+                                            <option value="VISIT">Home Visit</option>
+                                        </select>
+                                        <button @click="saveInteraction()"
+                                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">Log</button>
+                                    </div>
+                                </div>
+
+                                <!-- Interaction History -->
+                                <div class="space-y-3 max-h-60 overflow-y-auto">
+                                    <template x-for="interaction in currentInteractions" :key="interaction.id">
+                                        <div class="text-sm border-l-4 border-gray-300 pl-3 py-1">
+                                            <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                                <span class="font-bold uppercase" x-text="interaction.type"></span>
+                                                <span
+                                                    x-text="new Date(interaction.interactionTime).toLocaleString()"></span>
+                                            </div>
+                                            <p class="text-gray-700" x-text="interaction.notes"></p>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label for="material" class="block text-sm font-medium text-gray-700">Material</label>
-                                        <input type="text" x-model="formData.material" id="material" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-                                    </div>
-                                    <div>
-                                        <label for="imageUrl" class="block text-sm font-medium text-gray-700">Image URL</label>
-                                        <input type="text" x-model="formData.imageUrl" id="imageUrl" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-                                    </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="button" @click="saveDesk()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Save
-                        </button>
-                        <button type="button" @click="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancel
-                        </button>
                     </div>
                 </div>
             </div>
@@ -181,109 +288,182 @@
     </div>
 
     <script>
-        function deskApp() {
+        function collectionApp() {
             return {
-                desks: [],
-                isLoading: false,
-                isModalOpen: false,
-                modalMode: 'create', // or 'edit'
-                formData: {
-                    id: null,
-                    name: '',
-                    description: '',
-                    dimensions: '',
-                    material: '',
-                    price: 0,
-                    imageUrl: ''
+                debtors: [],
+                isDebtorModalOpen: false,
+                isManageModalOpen: false,
+                selectedDebtor: null,
+                currentLoans: [],
+                currentInteractions: [],
+
+                // Filters
+                searchQuery: '',
+                sortBy: 'name_asc',
+                filterHasDebt: false,
+
+                // Forms
+                debtorForm: { name: '', phoneNumber: '', address: '' },
+                loanForm: { amount: '', dueDate: '' },
+                interactionForm: { type: 'CALL', notes: '' },
+                showLoanForm: false,
+
+                async init() {
+                    await this.fetchDebtors();
                 },
 
-                init() {
-                    this.fetchDesks();
-                },
-
-                async fetchDesks() {
-                    this.isLoading = true;
+                // --- DATA FETCHING ---
+                async fetchDebtors() {
                     try {
-                        const response = await fetch('/api/desks');
-                        if (response.ok) {
-                            this.desks = await response.json();
-                        } else {
-                            console.error('Failed to fetch desks');
-                        }
-                    } catch (error) {
-                        console.error('Error fetching desks:', error);
-                    } finally {
-                        this.isLoading = false;
+                        const res = await fetch('/api/debtors');
+                        this.debtors = await res.json();
+                    } catch (e) {
+                        console.error("Error fetching debtors", e);
                     }
                 },
 
-                openModal(mode, desk = null) {
-                    this.modalMode = mode;
-                    if (mode === 'edit' && desk) {
-                        this.formData = { ...desk };
-                    } else {
-                        // Reset for create
-                        this.formData = {
-                            id: null,
-                            name: '',
-                            description: '',
-                            dimensions: '',
-                            material: '',
-                            price: 0,
-                            imageUrl: ''
-                        };
-                    }
-                    this.isModalOpen = true;
-                },
-
-                closeModal() {
-                    this.isModalOpen = false;
-                },
-
-                async saveDesk() {
-                    const method = this.modalMode === 'create' ? 'POST' : 'PUT';
-                    const url = this.modalMode === 'create' ? '/api/desks' : `/api/desks/${this.formData.id}`;
-                    
+                async fetchDebtorDetails(id) {
                     try {
-                        const response = await fetch(url, {
-                            method: method,
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(this.formData)
-                        });
-
-                        if (response.ok) {
-                            await this.fetchDesks();
-                            this.closeModal();
-                        } else {
-                            console.error('Failed to save desk');
-                            alert('Failed to save desk');
-                        }
-                    } catch (error) {
-                        console.error('Error saving desk:', error);
+                        const [loans, interactions] = await Promise.all([
+                            fetch(`/api/debtors/${id}/loans`).then(r => r.json()),
+                            fetch(`/api/debtors/${id}/interactions`).then(r => r.json())
+                        ]);
+                        this.currentLoans = loans;
+                        this.currentInteractions = interactions.sort((a, b) => new Date(b.interactionTime) - new Date(a.interactionTime));
+                    } catch (e) {
+                        console.error("Error fetching details", e);
                     }
                 },
 
-                async deleteDesk(id) {
-                    if (!confirm('Are you sure you want to delete this desk?')) return;
-                    
-                    try {
-                        const response = await fetch(`/api/desks/${id}`, {
-                            method: 'DELETE'
-                        });
+                // --- ACTIONS ---
+                async saveDebtor() {
+                    if (!this.debtorForm.name || !this.debtorForm.phoneNumber) return alert('Name and Phone are required');
 
-                        if (response.ok) {
-                            await this.fetchDesks();
-                        } else {
-                            console.error('Failed to delete desk');
-                        }
-                    } catch (error) {
-                        console.error('Error deleting desk:', error);
+                    await fetch('/api/debtors', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.debtorForm)
+                    });
+
+                    this.closeDebtorModal();
+                    await this.fetchDebtors();
+                },
+
+                async deleteDebtor(id) {
+                    if (!confirm('Delete this debtor and all related data?')) return;
+                    await fetch(`/api/debtors/${id}`, { method: 'DELETE' });
+                    await this.fetchDebtors();
+                },
+
+                async saveLoan() {
+                    if (!this.loanForm.amount || !this.loanForm.dueDate) return;
+
+                    const payload = {
+                        amount: this.loanForm.amount,
+                        remainingAmount: this.loanForm.amount,
+                        dueDate: this.loanForm.dueDate,
+                        status: 'CURRENT'
+                    };
+
+                    await fetch(`/api/debtors/${this.selectedDebtor.id}/loans`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    this.loanForm = { amount: '', dueDate: '' };
+                    this.showLoanForm = false;
+                    await this.fetchDebtorDetails(this.selectedDebtor.id);
+                    await this.fetchDebtors(); // Update totals in main list
+                },
+
+                async saveInteraction() {
+                    if (!this.interactionForm.notes) return;
+
+                    await fetch(`/api/debtors/${this.selectedDebtor.id}/interactions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.interactionForm)
+                    });
+
+                    this.interactionForm.notes = '';
+                    await this.fetchDebtorDetails(this.selectedDebtor.id);
+                },
+
+                // --- UI HELPERS ---
+                openDebtorModal() {
+                    this.debtorForm = { name: '', phoneNumber: '', address: '' };
+                    this.isDebtorModalOpen = true;
+                },
+                closeDebtorModal() {
+                    this.isDebtorModalOpen = false;
+                },
+
+                async openManageModal(debtor) {
+                    this.selectedDebtor = debtor;
+                    this.isManageModalOpen = true;
+                    this.loanForm = { amount: '', dueDate: '' };
+                    this.interactionForm = { type: 'CALL', notes: '' };
+                    this.showLoanForm = false;
+                    await this.fetchDebtorDetails(debtor.id);
+                },
+                closeManageModal() {
+                    this.isManageModalOpen = false;
+                    this.selectedDebtor = null;
+                },
+
+                calculateTotalDebt(loans) {
+                    if (!loans) return 0;
+                    return loans.reduce((acc, loan) => acc + (loan.remainingAmount || 0), 0);
+                },
+
+                formatCurrency(value) {
+                    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+                },
+
+                getWhatsappLink(phone) {
+                    if (!phone) return '#';
+                    // Strip non-numeric chars
+                    let clean = phone.replace(/\D/g, '');
+                    // Ensure ID country code
+                    if (clean.startsWith('0')) clean = '62' + clean.substring(1);
+                    return `https://wa.me/${clean}`;
+                },
+
+                get filteredDebtors() {
+                    let result = this.debtors;
+
+                    // 1. Search (Name or Phone)
+                    if (this.searchQuery) {
+                        const lower = this.searchQuery.toLowerCase();
+                        result = result.filter(d =>
+                            d.name.toLowerCase().includes(lower) ||
+                            d.phoneNumber.includes(lower)
+                        );
                     }
+
+                    // 2. Filter (Has Debt)
+                    if (this.filterHasDebt) {
+                        result = result.filter(d => this.calculateTotalDebt(d.loans) > 0);
+                    }
+
+                    // 3. Sort
+                    result = result.sort((a, b) => {
+                        if (this.sortBy === 'name_asc') return a.name.localeCompare(b.name);
+                        if (this.sortBy === 'name_desc') return b.name.localeCompare(a.name);
+
+                        const debtA = this.calculateTotalDebt(a.loans);
+                        const debtB = this.calculateTotalDebt(b.loans);
+
+                        if (this.sortBy === 'debt_desc') return debtB - debtA;
+                        if (this.sortBy === 'debt_asc') return debtA - debtB;
+                    });
+
+                    return result;
                 }
             }
         }
     </script>
 </body>
+
 </html>
