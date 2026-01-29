@@ -1,33 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Debt Collection Management</title>
+<head th:replace="~{fragments/layout :: head('Dashboard - Debt Collection')}"></head>
 
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+<body class="bg-gray-50 flex flex-col min-h-screen">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-    </style>
-</head>
-
-<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
-
-    <div x-data="collectionApp()" class="container mx-auto px-4 py-8">
+    <main class="flex-grow container mx-auto px-4 py-8" x-data="collectionApp()">
 
         <!-- Header -->
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Desk Collection System</h1>
-                <p class="text-gray-500">Manage debtors, loans, and interactions</p>
+                <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                <p class="text-gray-500">Manage your debtors and collection activities</p>
             </div>
             <button @click="openDebtorModal()"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow transition">
@@ -38,7 +24,6 @@
         <!-- Controls (Search, Sort, Filter) -->
         <div
             class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-
             <!-- Search -->
             <div class="w-full md:w-1/3 relative">
                 <input type="text" x-model="searchQuery" placeholder="Search name or phone..."
@@ -53,8 +38,6 @@
 
             <!-- Filters & Sort -->
             <div class="flex gap-4 items-center w-full md:w-auto">
-
-                <!-- Sort -->
                 <select x-model="sortBy"
                     class="border rounded-lg text-sm px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="name_asc">Name (A-Z)</option>
@@ -63,7 +46,6 @@
                     <option value="debt_asc">Lowest Debt</option>
                 </select>
 
-                <!-- Filter Checkbox -->
                 <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer select-none">
                     <input type="checkbox" x-model="filterHasDebt"
                         class="rounded text-blue-600 focus:ring-blue-500 h-4 w-4">
@@ -72,7 +54,6 @@
             </div>
         </div>
 
-        <!-- Debtor List -->
         <!-- Debtor List Table -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
             <div class="overflow-x-auto">
@@ -141,11 +122,12 @@
             <h3 class="text-xl font-medium text-gray-900">No Debtors Found</h3>
             <p class="text-gray-500 mt-2">Get started by adding a new debtor to the system.</p>
             <button @click="openDebtorModal()"
-                class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded shadow transition">
-                Add Debtor
-            </button>
+                class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded shadow transition">Add
+                Debtor</button>
         </div>
 
+        <!-- Modals: Add Debtor & Manage -->
+        <!-- Note: Using x-teleport if possible but for simplicity keeping inline or use Thymeleaf include if they were separate files -->
         <!-- Add Debtor Modal -->
         <div x-show="isDebtorModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
             <div class="flex items-center justify-center min-h-screen px-4">
@@ -156,17 +138,17 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Name</label>
                             <input type="text" x-model="debtorForm.name"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Phone Number (WhatsApp)</label>
                             <input type="text" x-model="debtorForm.phoneNumber" placeholder="e.g. 628123456789"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Address</label>
                             <textarea x-model="debtorForm.address" rows="3"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"></textarea>
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"></textarea>
                         </div>
                         <div class="flex justify-end space-x-3 mt-6">
                             <button @click="closeDebtorModal()"
@@ -179,27 +161,23 @@
             </div>
         </div>
 
-        <!-- Manage / Details Modal (Loans & Interactions) -->
+        <!-- Manage Modal -->
         <div x-show="isManageModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
             <div class="flex items-center justify-center min-h-screen px-4">
                 <div class="fixed inset-0 bg-black opacity-30" @click="closeManageModal()"></div>
                 <div
                     class="relative bg-white rounded-lg w-full max-w-4xl p-0 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
-
-                    <!-- Header -->
                     <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
                         <div>
                             <h2 class="text-xl font-bold text-gray-800" x-text="selectedDebtor?.name"></h2>
                             <p class="text-sm text-gray-500" x-text="selectedDebtor?.phoneNumber"></p>
                         </div>
-                        <button @click="closeManageModal()" class="text-gray-400 hover:text-gray-500">
-                            <span class="text-2xl">&times;</span>
-                        </button>
+                        <button @click="closeManageModal()" class="text-gray-400 hover:text-gray-500"><span
+                                class="text-2xl">&times;</span></button>
                     </div>
-
                     <div class="flex-1 overflow-y-auto p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+                            <!-- Helper logic same as original -->
                             <!-- Left: Loans -->
                             <div>
                                 <div class="flex justify-between items-center mb-4">
@@ -207,8 +185,6 @@
                                     <button @click="showLoanForm = !showLoanForm"
                                         class="text-sm text-blue-600 hover:underline">+ Add Loan</button>
                                 </div>
-
-                                <!-- Add Loan Form -->
                                 <div x-show="showLoanForm" class="bg-blue-50 p-4 rounded-lg mb-4 text-sm" x-transition>
                                     <div class="space-y-3">
                                         <input type="number" x-model="loanForm.amount" placeholder="Amount"
@@ -219,8 +195,6 @@
                                             Loan</button>
                                     </div>
                                 </div>
-
-                                <!-- Loan List -->
                                 <div class="space-y-3">
                                     <template x-for="loan in currentLoans" :key="loan.id">
                                         <div
@@ -231,27 +205,22 @@
                                                 <div class="text-xs text-gray-500">Due: <span
                                                         x-text="loan.dueDate"></span></div>
                                             </div>
-                                            <span class="px-2 py-1 text-xs rounded-full font-semibold" :class="{
-                                                    'bg-green-100 text-green-800': loan.status === 'CURRENT',
-                                                    'bg-red-100 text-red-800': loan.status === 'OVERDUE'
-                                                  }" x-text="loan.status || 'CURRENT'"></span>
+                                            <span class="px-2 py-1 text-xs rounded-full font-semibold"
+                                                :class="{ 'bg-green-100 text-green-800': loan.status === 'CURRENT', 'bg-red-100 text-red-800': loan.status === 'OVERDUE' }"
+                                                x-text="loan.status || 'CURRENT'"></span>
                                         </div>
                                     </template>
                                     <div x-show="currentLoans.length === 0"
                                         class="text-center text-gray-400 text-sm py-4">No loans record.</div>
                                 </div>
                             </div>
-
                             <!-- Right: Interactions -->
                             <div>
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-lg font-semibold text-gray-800">Interactions / Reminders</h3>
                                 </div>
-
-                                <!-- Add Interaction -->
                                 <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                                    <textarea x-model="interactionForm.notes" rows="2"
-                                        placeholder="Enter interaction notes..."
+                                    <textarea x-model="interactionForm.notes" rows="2" placeholder="Enter notes..."
                                         class="w-full border rounded p-2 text-sm mb-2"></textarea>
                                     <div class="flex space-x-2">
                                         <select x-model="interactionForm.type"
@@ -264,8 +233,6 @@
                                             class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">Log</button>
                                     </div>
                                 </div>
-
-                                <!-- Interaction History -->
                                 <div class="space-y-3 max-h-60 overflow-y-auto">
                                     <template x-for="interaction in currentInteractions" :key="interaction.id">
                                         <div class="text-sm border-l-4 border-gray-300 pl-3 py-1">
@@ -285,185 +252,12 @@
             </div>
         </div>
 
-    </div>
+    </main>
 
-    <script>
-        function collectionApp() {
-            return {
-                debtors: [],
-                isDebtorModalOpen: false,
-                isManageModalOpen: false,
-                selectedDebtor: null,
-                currentLoans: [],
-                currentInteractions: [],
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
 
-                // Filters
-                searchQuery: '',
-                sortBy: 'name_asc',
-                filterHasDebt: false,
-
-                // Forms
-                debtorForm: { name: '', phoneNumber: '', address: '' },
-                loanForm: { amount: '', dueDate: '' },
-                interactionForm: { type: 'CALL', notes: '' },
-                showLoanForm: false,
-
-                async init() {
-                    await this.fetchDebtors();
-                },
-
-                // --- DATA FETCHING ---
-                async fetchDebtors() {
-                    try {
-                        const res = await fetch('/api/debtors');
-                        this.debtors = await res.json();
-                    } catch (e) {
-                        console.error("Error fetching debtors", e);
-                    }
-                },
-
-                async fetchDebtorDetails(id) {
-                    try {
-                        const [loans, interactions] = await Promise.all([
-                            fetch(`/api/debtors/${id}/loans`).then(r => r.json()),
-                            fetch(`/api/debtors/${id}/interactions`).then(r => r.json())
-                        ]);
-                        this.currentLoans = loans;
-                        this.currentInteractions = interactions.sort((a, b) => new Date(b.interactionTime) - new Date(a.interactionTime));
-                    } catch (e) {
-                        console.error("Error fetching details", e);
-                    }
-                },
-
-                // --- ACTIONS ---
-                async saveDebtor() {
-                    if (!this.debtorForm.name || !this.debtorForm.phoneNumber) return alert('Name and Phone are required');
-
-                    await fetch('/api/debtors', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.debtorForm)
-                    });
-
-                    this.closeDebtorModal();
-                    await this.fetchDebtors();
-                },
-
-                async deleteDebtor(id) {
-                    if (!confirm('Delete this debtor and all related data?')) return;
-                    await fetch(`/api/debtors/${id}`, { method: 'DELETE' });
-                    await this.fetchDebtors();
-                },
-
-                async saveLoan() {
-                    if (!this.loanForm.amount || !this.loanForm.dueDate) return;
-
-                    const payload = {
-                        amount: this.loanForm.amount,
-                        remainingAmount: this.loanForm.amount,
-                        dueDate: this.loanForm.dueDate,
-                        status: 'CURRENT'
-                    };
-
-                    await fetch(`/api/debtors/${this.selectedDebtor.id}/loans`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    this.loanForm = { amount: '', dueDate: '' };
-                    this.showLoanForm = false;
-                    await this.fetchDebtorDetails(this.selectedDebtor.id);
-                    await this.fetchDebtors(); // Update totals in main list
-                },
-
-                async saveInteraction() {
-                    if (!this.interactionForm.notes) return;
-
-                    await fetch(`/api/debtors/${this.selectedDebtor.id}/interactions`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.interactionForm)
-                    });
-
-                    this.interactionForm.notes = '';
-                    await this.fetchDebtorDetails(this.selectedDebtor.id);
-                },
-
-                // --- UI HELPERS ---
-                openDebtorModal() {
-                    this.debtorForm = { name: '', phoneNumber: '', address: '' };
-                    this.isDebtorModalOpen = true;
-                },
-                closeDebtorModal() {
-                    this.isDebtorModalOpen = false;
-                },
-
-                async openManageModal(debtor) {
-                    this.selectedDebtor = debtor;
-                    this.isManageModalOpen = true;
-                    this.loanForm = { amount: '', dueDate: '' };
-                    this.interactionForm = { type: 'CALL', notes: '' };
-                    this.showLoanForm = false;
-                    await this.fetchDebtorDetails(debtor.id);
-                },
-                closeManageModal() {
-                    this.isManageModalOpen = false;
-                    this.selectedDebtor = null;
-                },
-
-                calculateTotalDebt(loans) {
-                    if (!loans) return 0;
-                    return loans.reduce((acc, loan) => acc + (loan.remainingAmount || 0), 0);
-                },
-
-                formatCurrency(value) {
-                    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
-                },
-
-                getWhatsappLink(phone) {
-                    if (!phone) return '#';
-                    // Strip non-numeric chars
-                    let clean = phone.replace(/\D/g, '');
-                    // Ensure ID country code
-                    if (clean.startsWith('0')) clean = '62' + clean.substring(1);
-                    return `https://wa.me/${clean}`;
-                },
-
-                get filteredDebtors() {
-                    let result = this.debtors;
-
-                    // 1. Search (Name or Phone)
-                    if (this.searchQuery) {
-                        const lower = this.searchQuery.toLowerCase();
-                        result = result.filter(d =>
-                            d.name.toLowerCase().includes(lower) ||
-                            d.phoneNumber.includes(lower)
-                        );
-                    }
-
-                    // 2. Filter (Has Debt)
-                    if (this.filterHasDebt) {
-                        result = result.filter(d => this.calculateTotalDebt(d.loans) > 0);
-                    }
-
-                    // 3. Sort
-                    result = result.sort((a, b) => {
-                        if (this.sortBy === 'name_asc') return a.name.localeCompare(b.name);
-                        if (this.sortBy === 'name_desc') return b.name.localeCompare(a.name);
-
-                        const debtA = this.calculateTotalDebt(a.loans);
-                        const debtB = this.calculateTotalDebt(b.loans);
-
-                        if (this.sortBy === 'debt_desc') return debtB - debtA;
-                        if (this.sortBy === 'debt_asc') return debtA - debtB;
-                    });
-
-                    return result;
-                }
-            }
-        }
-    </script>
+    <!-- JS Module -->
+    <script src="/js/dashboard.js"></script>
 </body>
 
 </html>
