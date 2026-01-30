@@ -212,3 +212,15 @@ Hibernate: select d1_0.id,d1_0.address,d1_0.created_at,d1_0.email,d1_0.name,d1_0
 Hibernate: select l1_0.debtor_id,l1_0.id,l1_0.amount,l1_0.due_date,l1_0.remaining_amount,l1_0.status from loans l1_0 where l1_0.debtor_id=?
 Hibernate: select l1_0.debtor_id,l1_0.id,l1_0.amount,l1_0.due_date,l1_0.remaining_amount,l1_0.status from loans l1_0 where l1_0.debtor_id=?
 Hibernate: select l1_0.debtor_id,l1_0.id,l1_0.amount,l1_0.due_date,l1_0.remaining_amount,l1_0.status from loans l1_0 where l1_0.debtor_id=?
+Hibernate: select u1_0.id,u1_0.created_at,u1_0.password,u1_0.role,u1_0.username from users u1_0
+Hibernate: select d1_0.id,d1_0.address,d1_0.created_at,d1_0.email,d1_0.name,d1_0.notes,d1_0.phone_number from debtors d1_0
+Hibernate: select l1_0.debtor_id,l1_0.id,l1_0.amount,l1_0.due_date,l1_0.remaining_amount,l1_0.status from loans l1_0 where l1_0.debtor_id=?
+Hibernate: select l1_0.debtor_id,l1_0.id,l1_0.amount,l1_0.due_date,l1_0.remaining_amount,l1_0.status from loans l1_0 where l1_0.debtor_id=?
+Hibernate: select l1_0.debtor_id,l1_0.id,l1_0.amount,l1_0.due_date,l1_0.remaining_amount,l1_0.status from loans l1_0 where l1_0.debtor_id=?
+Hibernate: select i1_0.id,i1_0.debtor_id,i1_0.interaction_time,i1_0.notes,i1_0.outcome,i1_0.type from interactions i1_0 where i1_0.debtor_id=?
+Hibernate: select l1_0.id,l1_0.amount,l1_0.debtor_id,l1_0.due_date,l1_0.remaining_amount,l1_0.status from loans l1_0 where l1_0.debtor_id=?
+2026-01-29T23:50:17.712+07:00  INFO 44449 --- [desk-collection] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-29T23:50:17.716+07:00  INFO 44449 --- [desk-collection] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-01-29T23:50:17.731+07:00  INFO 44449 --- [desk-collection] [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-29T23:50:17.737+07:00  INFO 44449 --- [desk-collection] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-01-29T23:50:17.744+07:00  INFO 44449 --- [desk-collection] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

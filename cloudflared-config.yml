@@ -1,0 +1,7 @@
+tunnel: 5ed603a1-8874-4b96-899f-42291a4c7ad4
+credentials-file: /home/feldy/.cloudflared/5ed603a1-8874-4b96-899f-42291a4c7ad4.json
+
+ingress:
+  - hostname: efwayapp.web.id
+    service: http://localhost:8080
+  - service: http_status:404
