@@ -3,6 +3,7 @@ package com.azs.deskcollection.service;
 import com.azs.deskcollection.model.Debtor;
 import com.azs.deskcollection.model.Interaction;
 import com.azs.deskcollection.model.Loan;
+import com.azs.deskcollection.model.User;
 import com.azs.deskcollection.repository.DebtorRepository;
 import com.azs.deskcollection.repository.InteractionRepository;
 import com.azs.deskcollection.repository.LoanRepository;
@@ -31,15 +32,26 @@ public class DebtCollectionService {
     }
 
     // Debtor Operations
+    public List<Debtor> findDebtorsByUser(User user) {
+        return debtorRepository.findByUser(user);
+    }
+
+    // Kept for backward compatibility or Admin use if needed, but
+    // renamed/deprecated
     public List<Debtor> findAllDebtors() {
         return debtorRepository.findAll();
+    }
+
+    public Optional<Debtor> findDebtorByIdAndUser(Long id, User user) {
+        return debtorRepository.findByIdAndUser(id, user);
     }
 
     public Optional<Debtor> findDebtorById(Long id) {
         return debtorRepository.findById(id);
     }
 
-    public Debtor saveDebtor(Debtor debtor) {
+    public Debtor saveDebtor(Debtor debtor, User user) {
+        debtor.setUser(user);
         return debtorRepository.save(debtor);
     }
 

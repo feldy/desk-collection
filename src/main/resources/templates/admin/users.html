@@ -59,7 +59,7 @@
                                         x-text="user.role"></span>
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium">
-                                    <button @click="deleteUser(user.id)"
+                                    <button @click="deleteUser(user.id)" x-show="user.role !== 'SUPERADMIN'"
                                         class="text-red-600 hover:text-red-900">Delete</button>
                                 </td>
                             </tr>

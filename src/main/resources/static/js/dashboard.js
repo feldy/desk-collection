@@ -3,11 +3,12 @@ function collectionApp() {
         debtors: [],
         filteredDebtors: [], // Separate to avoid getter complexity with initial state
         isDebtorModalOpen: false,
+        isImportModalOpen: false,
         isManageModalOpen: false,
         selectedDebtor: null,
         currentLoans: [],
         currentInteractions: [],
-        
+
         // Filters
         searchQuery: '',
         sortBy: 'name_asc',
@@ -22,7 +23,7 @@ function collectionApp() {
         async init() {
             await this.fetchDebtors();
             this.updateFilteredDebtors();
-            
+
             // Watchers for filters
             this.$watch('searchQuery', () => this.updateFilteredDebtors());
             this.$watch('sortBy', () => this.updateFilteredDebtors());
@@ -36,8 +37,8 @@ function collectionApp() {
             // 1. Search
             if (this.searchQuery) {
                 const lower = this.searchQuery.toLowerCase();
-                result = result.filter(d => 
-                    d.name.toLowerCase().includes(lower) || 
+                result = result.filter(d =>
+                    d.name.toLowerCase().includes(lower) ||
                     d.phoneNumber.includes(lower)
                 );
             }
@@ -51,10 +52,10 @@ function collectionApp() {
             result.sort((a, b) => {
                 if (this.sortBy === 'name_asc') return a.name.localeCompare(b.name);
                 if (this.sortBy === 'name_desc') return b.name.localeCompare(a.name);
-                
+
                 const debtA = this.calculateTotalDebt(a.loans);
                 const debtB = this.calculateTotalDebt(b.loans);
-                
+
                 if (this.sortBy === 'debt_desc') return debtB - debtA;
                 if (this.sortBy === 'debt_asc') return debtA - debtB;
                 return 0;
@@ -104,6 +105,34 @@ function collectionApp() {
             if (!confirm('Delete this debtor and all related data?')) return;
             await fetch(`/api/debtors/${id}`, { method: 'DELETE' });
             await this.fetchDebtors();
+            await this.fetchDebtors();
+        },
+
+        async importDebtors() {
+            const fileInput = this.$refs.importFile;
+            if (!fileInput.files.length) return alert('Please select a file');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/api/debtors/import', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    alert('Debtors imported successfully!');
+                    this.closeImportModal();
+                    await this.fetchDebtors();
+                } else {
+                    const text = await res.text();
+                    alert('Failed to import: ' + text);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error importing file');
+            }
         },
 
         async saveLoan() {
@@ -141,6 +170,33 @@ function collectionApp() {
             await this.fetchDebtorDetails(this.selectedDebtor.id);
         },
 
+        async sendWhatsAppMessage() {
+            if (!this.interactionForm.notes) return alert('Message content is required');
+
+            // 1. Send via WAHA
+            try {
+                const res = await fetch('/api/whatsapp/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: this.selectedDebtor.phoneNumber,
+                        message: this.interactionForm.notes
+                    })
+                });
+
+                if (!res.ok) throw new Error('Failed to send message');
+
+                alert('Message sent to WhatsApp!');
+
+                // 2. Log as interaction
+                await this.saveInteraction();
+
+            } catch (e) {
+                console.error(e);
+                alert('Failed to send WhatsApp message. Check connection.');
+            }
+        },
+
         // --- UI HELPERS ---
         openDebtorModal() {
             this.debtorForm = { name: '', phoneNumber: '', address: '' };
@@ -148,6 +204,13 @@ function collectionApp() {
         },
         closeDebtorModal() {
             this.isDebtorModalOpen = false;
+        },
+
+        openImportModal() {
+            this.isImportModalOpen = true;
+        },
+        closeImportModal() {
+            this.isImportModalOpen = false;
         },
 
         async openManageModal(debtor) {

@@ -26,5 +26,24 @@ services:
       - db
     restart: always
 
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: desk_collection_waha
+    environment:
+      WHATSAPP_DEFAULT_ENGINE: WEBJS
+      WHATSAPP_RESTART_ON_FAIL: "True"
+      WHATSAPP_DISABLE_WEB_PAGE_PREVIEW: "True"
+      WAHA_DASHBOARD_USERNAME: "admin"
+      WAHA_DASHBOARD_PASSWORD: "password"
+      WAHA_SWAGGER_USERNAME: "admin"
+      WAHA_SWAGGER_PASSWORD: "password"
+      WAHA_API_KEY: "secret123"
+    ports:
+      - "3000:3000"
+    volumes:
+      - waha_data:/app/.waha
+    restart: always
+
 volumes:
   db_data:
+  waha_data:

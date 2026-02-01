@@ -31,9 +31,18 @@
 
             <div class="flex items-center space-x-4">
                 <div sec:authorize="isAuthenticated()" class="flex items-center space-x-4">
-                    <a th:href="@{/dashboard}" class="hover:text-blue-200 transition">Dashboard</a>
+                    <a sec:authorize="hasRole('USER')" th:href="@{/dashboard}"
+                        class="hover:text-blue-200 transition">Dashboard</a>
+                    <a sec:authorize="hasRole('USER')" th:href="@{/debtors}" class="hover:text-blue-200 transition">My
+                        Debtors</a>
+                    <a sec:authorize="hasRole('SUPERADMIN')" th:href="@{/admin/dashboard}"
+                        class="hover:text-blue-200 transition">Admin Dashboard</a>
+                    <a sec:authorize="hasRole('SUPERADMIN')" th:href="@{/devices}"
+                        class="hover:text-blue-200 transition">Devices</a>
                     <a sec:authorize="hasRole('SUPERADMIN')" th:href="@{/admin/users}"
                         class="hover:text-blue-200 transition">Users</a>
+                    <a sec:authorize="hasRole('SUPERADMIN')" th:href="@{/admin/debtors}"
+                        class="hover:text-blue-200 transition">Debtors</a>
                     <span class="text-blue-200 text-sm">Welcome, <span sec:authentication="name">User</span></span>
                     <form th:action="@{/logout}" method="post" class="inline">
                         <button type="submit"

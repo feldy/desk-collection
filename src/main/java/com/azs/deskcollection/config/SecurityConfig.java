@@ -28,7 +28,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/home", "/login", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/api/**").hasAnyRole("USER", "SUPERADMIN")
+                        .requestMatchers("/debtors/**").hasAnyRole("USER", "SUPERADMIN") // Allow Page Access
                         .requestMatchers("/dashboard/**").hasAnyRole("USER", "SUPERADMIN")
+                        .requestMatchers("/devices/**").hasRole("SUPERADMIN")
                         .requestMatchers("/admin/**").hasRole("SUPERADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
